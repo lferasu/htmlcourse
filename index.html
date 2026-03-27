@@ -1,12 +1,355 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <title>Document</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Immersive Audio Wave Animations</title>
+  <style>
+    :root {
+      --text: #e7ecff;
+      --muted: #9da8d1;
+      --line: rgba(176, 192, 255, 0.18);
+      --panel: rgba(9, 14, 37, 0.32);
+      --glow-1: #51d8ff;
+      --glow-2: #8d6cff;
+      --glow-3: #43f5b0;
+      --glow-4: #ff5cd2;
+      --glow-5: #ffd16e;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      min-height: 100vh;
+      font-family: Inter, Segoe UI, system-ui, -apple-system, sans-serif;
+      color: var(--text);
+      background: transparent;
+      padding: 2.2rem 1.2rem 3rem;
+      display: grid;
+      place-items: center;
+    }
+
+    .layout {
+      width: min(1100px, 100%);
+      display: grid;
+      gap: 1.2rem;
+    }
+
+    h1 {
+      text-align: center;
+      letter-spacing: 0.05em;
+      font-weight: 700;
+      font-size: clamp(1.35rem, 3.2vw, 2.2rem);
+      text-transform: uppercase;
+    }
+
+    p.subtitle {
+      text-align: center;
+      color: var(--muted);
+      margin-top: -0.5rem;
+      margin-bottom: 0.2rem;
+      font-size: 0.95rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(205px, 1fr));
+      gap: 1rem;
+    }
+
+    .option {
+      border: 1px solid var(--line);
+      background: var(--panel);
+      backdrop-filter: blur(8px);
+      border-radius: 16px;
+      padding: 1rem 1rem 0.8rem;
+      min-height: 230px;
+      display: grid;
+      grid-template-rows: 1fr auto;
+      gap: 0.8rem;
+      overflow: hidden;
+      position: relative;
+      isolation: isolate;
+    }
+
+    .option::before {
+      content: "";
+      position: absolute;
+      inset: -40%;
+      z-index: -1;
+      background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.08), transparent 48%);
+      opacity: 0.25;
+      animation: pulseGlow 6s ease-in-out infinite;
+    }
+
+    .label {
+      font-size: 0.85rem;
+      letter-spacing: 0.08em;
+      color: var(--muted);
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .stage {
+      display: grid;
+      place-items: center;
+      position: relative;
+      min-height: 152px;
+      width: 100%;
+    }
+
+    .bars {
+      display: flex;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 0.24rem;
+      height: 118px;
+      width: 100%;
+    }
+
+    .bar {
+      width: 0.34rem;
+      height: 18%;
+      border-radius: 999px;
+      background: linear-gradient(180deg, var(--tone), color-mix(in oklab, var(--tone), #fff 20%));
+      box-shadow: 0 0 10px color-mix(in oklab, var(--tone), #fff 20%);
+      animation: barRise var(--speed) ease-in-out infinite;
+      animation-delay: calc(var(--i) * -0.1s);
+      transform-origin: bottom;
+    }
+
+    .option-1 { --tone: var(--glow-1); --speed: 1.05s; }
+    .option-2 { --tone: var(--glow-2); --speed: 1.3s; }
+    .option-3 { --tone: var(--glow-3); --speed: 0.88s; }
+    .option-4 { --tone: var(--glow-4); --speed: 1.35s; }
+    .option-5 { --tone: var(--glow-5); --speed: 0.95s; }
+
+    /* Option 2: radial equalizer */
+    .ring {
+      --count: 20;
+      position: relative;
+      width: 122px;
+      height: 122px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+    }
+
+    .ring span {
+      --angle: calc((360deg / var(--count)) * var(--i));
+      position: absolute;
+      width: 0.27rem;
+      height: 1.4rem;
+      border-radius: 0.3rem;
+      background: var(--tone);
+      transform: rotate(var(--angle)) translateY(-58px);
+      transform-origin: center 61px;
+      animation: ringPulse var(--speed) ease-in-out infinite;
+      animation-delay: calc(var(--i) * -0.06s);
+      box-shadow: 0 0 8px var(--tone);
+    }
+
+    .core {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: color-mix(in oklab, var(--tone), #fff 24%);
+      box-shadow: 0 0 22px var(--tone), inset 0 0 10px rgba(255, 255, 255, 0.5);
+      animation: coreBeat 1.15s ease-in-out infinite;
+    }
+
+    /* Option 3: oscillating line */
+    .line-wave {
+      width: 100%;
+      height: 90px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.38rem;
+    }
+
+    .dot {
+      width: 0.5rem;
+      height: 0.5rem;
+      border-radius: 50%;
+      background: var(--tone);
+      box-shadow: 0 0 10px var(--tone);
+      animation: floatY var(--speed) ease-in-out infinite;
+      animation-delay: calc(var(--i) * -0.12s);
+    }
+
+    /* Option 4: mirrored spectrum */
+    .mirror {
+      display: grid;
+      gap: 0.42rem;
+      width: 100%;
+    }
+
+    .half {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.22rem;
+      height: 52px;
+    }
+
+    .half.bottom {
+      transform: scaleY(-1);
+      opacity: 0.68;
+      filter: blur(0.2px);
+    }
+
+    .half .bar {
+      width: 0.3rem;
+      animation-duration: 0.9s;
+    }
+
+    /* Option 5: waveform tunnel */
+    .tunnel {
+      position: relative;
+      width: 146px;
+      height: 146px;
+      display: grid;
+      place-items: center;
+    }
+
+    .orbit {
+      position: absolute;
+      border-radius: 50%;
+      border: 2px solid color-mix(in oklab, var(--tone), #fff 24%);
+      opacity: 0.7;
+      animation: orbitExpand var(--speed) ease-out infinite;
+      box-shadow: 0 0 18px color-mix(in oklab, var(--tone), #fff 14%);
+    }
+
+    .orbit:nth-child(1) { width: 24px; height: 24px; animation-delay: 0s; }
+    .orbit:nth-child(2) { width: 24px; height: 24px; animation-delay: 0.24s; }
+    .orbit:nth-child(3) { width: 24px; height: 24px; animation-delay: 0.48s; }
+    .orbit:nth-child(4) { width: 24px; height: 24px; animation-delay: 0.72s; }
+
+    .beam {
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--tone);
+      box-shadow: 0 0 22px var(--tone);
+      animation: coreBeat 1.2s ease-in-out infinite;
+    }
+
+    @keyframes barRise {
+      0%, 100% { height: 14%; opacity: 0.45; }
+      50% { height: 100%; opacity: 1; }
+    }
+
+    @keyframes ringPulse {
+      0%, 100% { height: 1rem; opacity: 0.55; }
+      50% { height: 2rem; opacity: 1; }
+    }
+
+    @keyframes floatY {
+      0%, 100% { transform: translateY(0) scale(0.7); opacity: 0.45; }
+      50% { transform: translateY(-30px) scale(1.15); opacity: 1; }
+    }
+
+    @keyframes orbitExpand {
+      0% { transform: scale(0.2); opacity: 0.7; }
+      80% { opacity: 0.08; }
+      100% { transform: scale(5.3); opacity: 0; }
+    }
+
+    @keyframes coreBeat {
+      0%, 100% { transform: scale(0.82); }
+      50% { transform: scale(1.18); }
+    }
+
+    @keyframes pulseGlow {
+      0%, 100% { transform: scale(0.88); opacity: 0.2; }
+      50% { transform: scale(1.2); opacity: 0.4; }
+    }
+
+    @media (max-width: 480px) {
+      .option { min-height: 208px; }
+      .stage { min-height: 132px; }
+    }
+  </style>
 </head>
 <body>
-    hello
+  <main class="layout">
+    <h1>Audio Wave Animations</h1>
+    <p class="subtitle">Five immersive CSS-only options on a transparent page background</p>
+
+    <section class="grid" aria-label="audio wave animation options">
+      <article class="option option-1">
+        <div class="stage">
+          <div class="bars" aria-hidden="true">
+            <span class="bar" style="--i:1"></span><span class="bar" style="--i:2"></span><span class="bar" style="--i:3"></span><span class="bar" style="--i:4"></span>
+            <span class="bar" style="--i:5"></span><span class="bar" style="--i:6"></span><span class="bar" style="--i:7"></span><span class="bar" style="--i:8"></span>
+            <span class="bar" style="--i:9"></span><span class="bar" style="--i:10"></span><span class="bar" style="--i:11"></span><span class="bar" style="--i:12"></span>
+            <span class="bar" style="--i:13"></span><span class="bar" style="--i:14"></span><span class="bar" style="--i:15"></span>
+          </div>
+        </div>
+        <p class="label">01 · Neon Bars</p>
+      </article>
+
+      <article class="option option-2">
+        <div class="stage">
+          <div class="ring" aria-hidden="true">
+            <span style="--i:0"></span><span style="--i:1"></span><span style="--i:2"></span><span style="--i:3"></span><span style="--i:4"></span>
+            <span style="--i:5"></span><span style="--i:6"></span><span style="--i:7"></span><span style="--i:8"></span><span style="--i:9"></span>
+            <span style="--i:10"></span><span style="--i:11"></span><span style="--i:12"></span><span style="--i:13"></span><span style="--i:14"></span>
+            <span style="--i:15"></span><span style="--i:16"></span><span style="--i:17"></span><span style="--i:18"></span><span style="--i:19"></span>
+            <div class="core"></div>
+          </div>
+        </div>
+        <p class="label">02 · Radial Pulse</p>
+      </article>
+
+      <article class="option option-3">
+        <div class="stage">
+          <div class="line-wave" aria-hidden="true">
+            <span class="dot" style="--i:1"></span><span class="dot" style="--i:2"></span><span class="dot" style="--i:3"></span><span class="dot" style="--i:4"></span>
+            <span class="dot" style="--i:5"></span><span class="dot" style="--i:6"></span><span class="dot" style="--i:7"></span><span class="dot" style="--i:8"></span>
+            <span class="dot" style="--i:9"></span><span class="dot" style="--i:10"></span><span class="dot" style="--i:11"></span><span class="dot" style="--i:12"></span>
+          </div>
+        </div>
+        <p class="label">03 · Floating Signal</p>
+      </article>
+
+      <article class="option option-4">
+        <div class="stage">
+          <div class="mirror" aria-hidden="true">
+            <div class="half top">
+              <span class="bar" style="--i:1"></span><span class="bar" style="--i:2"></span><span class="bar" style="--i:3"></span><span class="bar" style="--i:4"></span>
+              <span class="bar" style="--i:5"></span><span class="bar" style="--i:6"></span><span class="bar" style="--i:7"></span><span class="bar" style="--i:8"></span>
+              <span class="bar" style="--i:9"></span><span class="bar" style="--i:10"></span><span class="bar" style="--i:11"></span>
+            </div>
+            <div class="half bottom">
+              <span class="bar" style="--i:1"></span><span class="bar" style="--i:2"></span><span class="bar" style="--i:3"></span><span class="bar" style="--i:4"></span>
+              <span class="bar" style="--i:5"></span><span class="bar" style="--i:6"></span><span class="bar" style="--i:7"></span><span class="bar" style="--i:8"></span>
+              <span class="bar" style="--i:9"></span><span class="bar" style="--i:10"></span><span class="bar" style="--i:11"></span>
+            </div>
+          </div>
+        </div>
+        <p class="label">04 · Mirror Spectrum</p>
+      </article>
+
+      <article class="option option-5">
+        <div class="stage">
+          <div class="tunnel" aria-hidden="true">
+            <span class="orbit"></span>
+            <span class="orbit"></span>
+            <span class="orbit"></span>
+            <span class="orbit"></span>
+            <span class="beam"></span>
+          </div>
+        </div>
+        <p class="label">05 · Wave Tunnel</p>
+      </article>
+    </section>
+  </main>
 </body>
 </html>
